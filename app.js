@@ -1,53 +1,45 @@
 import express from "express";
+import morgan from "morgan";
+import mongoose from "mongoose";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
+import Blog from "./models/blog.js";
 
 // Recreate __filename and __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
-app.listen(3000);
+const dbURI =
+  "mongodb+srv://aimetiti8:byiringiro@nodetuts.fiqcyby.mongodb.net/?appName=nodetuts";
+mongoose
+  .connect(dbURI)
+  .then((el) => app.listen(3000))
+  .catch((e) => console.log("error occured"));
 
 app.set("view engine", "ejs");
 
-app.use((req, res,next) => {
-  console.log("new request made");
-  console.log("host", req.hostname);
-  console.log("path", req.path);
-  console.log("method", req.method);
-  next();
-});
-
-app.use((req,res,next) => {
-  console.log("in the next middleware");
-  next();
-})
+app.use(express.static("public"));
+app.use(morgan("dev"));
 
 app.get("/", (req, res) => {
-  const blogs = [
-    {
-      title: "Yoshi finds eggs",
-      snippet: "Lorem ipsum dolor sit amet consectetur",
-    },
-    {
-      title: "Mario finds stars",
-      snippet: "Lorem ipsum dolor sit amet consectetur",
-    },
-    {
-      title: "How to defeat bowser",
-      snippet: "Lorem ipsum dolor sit amet consectetur",
-    },
-  ];
-  res.render("index", { title: "Home", blogs });
+  res.redirect("/blogs");
 });
 
 app.get("/about", (req, res) => {
   res.render("about", { title: "About" });
 });
-
+//blogs
 app.get("/blogs/create", (req, res) => {
   res.render("create", { title: "Blogs Create" });
+});
+app.get("/blogs", (req, res) => {
+  Blog.find()
+    .sort({ createdAt: -1 })
+    .then((result) => {
+      res.render("index", { title: "All blogs", blogs: result });
+    })
+    .catch((err) => console.log(err));
 });
 //redirecting
 app.get("/about-us", (req, res) => {
