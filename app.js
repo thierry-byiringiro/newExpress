@@ -20,6 +20,7 @@ mongoose
 app.set("view engine", "ejs");
 
 app.use(express.static("public"));
+app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 
 app.get("/", (req, res) => {
@@ -41,11 +42,28 @@ app.get("/blogs", (req, res) => {
     })
     .catch((err) => console.log(err));
 });
+
+app.post("/blogs", (req, res) => {
+  const blog = new Blog({
+    title: req.body.title,
+    snippet: req.body.snippet,
+    body: req.body.body,
+  });
+  blog
+    .save()
+    .then((result) => res.redirect("/blogs"))
+    .catch((err) => console.log("saving the data failed"));
+});
+
+app.get("/blog/:id", (req, res) => {
+  Blog.findById(req.params.id)
+    .then((resu) => res.send(resu))
+    .catch((e) => console.log(e));
+});
 //redirecting
 app.get("/about-us", (req, res) => {
   res.redirect("/about");
 });
-
 //404 - Error page
 
 app.use((req, res) => {
