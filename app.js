@@ -57,8 +57,16 @@ app.post("/blogs", (req, res) => {
 
 app.get("/blog/:id", (req, res) => {
   Blog.findById(req.params.id)
-    .then((resu) => res.send(resu))
-    .catch((e) => console.log(e));
+    .then((result) =>
+      res.render("details", { blog: result, title: "Blogs Details" }),
+    )
+    .catch((err) => console.log(err));
+});
+
+app.delete("/blog/:id", (req, res) => {
+  Blog.findByIdAndDelete(req.params.id)
+    .then((result) => res.json({ redirect: "/blogs" }))
+    .catch((err) => console.log(err));
 });
 //redirecting
 app.get("/about-us", (req, res) => {
